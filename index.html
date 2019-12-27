@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Comfortaa&display=swap" rel="stylesheet">
+    <script src="main.js"></script>
+    <title>tic tac toe</title>
+  </head>
+
+  <body>
+    <div class="win-screen">
+      <div class="white-box">
+        <div class="xCross"></div>
+        <div class="draw-text">draw</div>
+        <div class="oCircle"></div>
+        <div class="won-text">won</div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+      <div id="grid">
+        <div id="a1" class="box">
+          <div class="box-content"></div>
+        </div>
+
+        <div id="a2" class="box">
+          <div class="box-content"></div>
+        </div>
+
+        <div id="a3" class="box">
+          <div class="box-content"></div>
+        </div>
+
+        <div id="b1" class="box">
+          <div class="box-content"></div>
+        </div>
+
+        <div id="b2" class="box">
+          <div class="box-content"></div>
+          <object data="assets/svg/replay.svg" type="image/svg+xml" class="replay-icon"></object>
+          <div class="winning-line"></div>
+        </div>
+
+        <div id="b3" class="box">
+          <div class="box-content"></div>
+        </div>
+
+        <div id="c1" class="box">
+          <div class="box-content"></div>
+        </div>
+
+        <div id="c2" class="box">
+          <div class="box-content"></div>
+        </div>
+
+        <div id="c3" class="box">
+          <div class="box-content"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="turn-indicator-box">
+      <div class="x-turn on-turn">
+        <div class="xCross"></div>
+      </div>
+
+      <div class="o-turn">
+        <div class="oCircle"></div>
+      </div>
+    </div>
+  </body>
+
+</html>

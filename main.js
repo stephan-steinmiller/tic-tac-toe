@@ -27,11 +27,12 @@ window.onload = function () {
   boxList.forEach((box) => {
     box.addEventListener("click", fillBox, {once: true})
   });
-
+  console.log(document.querySelector(".replay-icon"));
+  document.querySelector(".replay-icon").addEventListener("click", resetBoard);
 }
 
 function fillBox(e) {
-  clickCounter--;
+  clickCounter--; console.log();
   if (e.target.classList.contains("box") && !hasWon) {
     const playerSymbol = turn ? 'oCircle' : "xCross"
     e.target.children[0].classList.add(playerSymbol);
@@ -81,12 +82,10 @@ function checkWinConditions(symbolToSelect) {
         showWinScreen()
         document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
         document.querySelector(`.win-screen .white-box > div.won-text`).classList.toggle(winningTurn ? "red-text" : "blue-text");
-        console.log(winningSymbol);
         isAnimating = false
       }, 1000);
     }, 300);
-
-  } else if (!clickCounter) {
+  } else if (clickCounter <= 0) {
     //Draw Condition is true
     showWinScreen()
     document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "block";
@@ -100,12 +99,13 @@ function showWinScreen() {
   document.querySelector(".replay-icon").classList.toggle("replay-icon-fade-in");
 }
 
-function resetBoard(winningSymbol, winningTurn) {
+function resetBoard() {console.log(winningSymbol);
   if (isAnimating) {
     setTimeout(() => {
-      resetBoard(winningSymbol, winningTurn)
+      resetBoard()
     }, 200);
   } else {
+    console.log(winningSymbol);
     document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
     document.querySelector(`.win-screen .white-box > div.won-text`).classList.toggle(winningSymbol ? "red-text" : "blue-text");
     document.querySelector(".turn-indicator-box").style.display = "flex";

@@ -85,13 +85,13 @@ body {
 
 
 .wrapper {
+  position: relative;
   border-radius: 2rem;
   overflow: hidden;
   margin-top: 2rem;
 }
 #grid {
   position: relative;
-  width: 80%;
   max-height: 606px;
   max-width: 606px;
 
@@ -196,20 +196,25 @@ body {
 
 
 .replay-icon {
+  user-select: none;
+  cursor: pointer;
   z-index: 4;
   position: absolute;
   left: 50%;
-  opacity: 0;
+  top: 50%;
+  opacity: 1;
   width: 5rem;
   height: 5rem;
 
   transition: opacity 0.6s, transform 0.6s;
-  transform: translateX(-50%) scale(0) rotateY(180deg);
+  transform: translateX(-50%) translateY(-50%) scale(0) rotateY(180deg);
 }
 
 .replay-icon-fade-in {
+  left: 50%;
+  top: 50%;
   opacity: 1;
-  transform: translateX(-50%) scale(1) rotateY(180deg) rotateZ(-405deg);
+  transform: translateX(-50%) translateY(-50%) scale(1) rotateY(180deg) rotateZ(-405deg);
 }
 
 .winning-line {

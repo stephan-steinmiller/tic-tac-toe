@@ -21,18 +21,21 @@ const winConditions = [
 ];
 
 window.onload = function () {
-  let $boxes = document.getElementsByClassName('box');
-
-  const boxList = [...$boxes]
-  boxList.forEach((box) => {
-    box.addEventListener("click", fillBox, {once: true})
-  });
-  console.log(document.querySelector(".replay-icon"));
+  addBoxListener();
   document.querySelector(".replay-icon").addEventListener("click", resetBoard);
 }
 
+function addBoxListener() {
+  let $boxes = document.getElementsByClassName('box');
+  const boxList = [...$boxes]
+  boxList.forEach((box) => {
+    box.removeEventListener("click", fillBox)
+    box.addEventListener("click", fillBox, {once: true})
+  });
+}
+
 function fillBox(e) {
-  clickCounter--; console.log();
+  clickCounter--;
   if (e.target.classList.contains("box") && !hasWon) {
     const playerSymbol = turn ? 'oCircle' : "xCross"
     e.target.children[0].classList.add(playerSymbol);
@@ -47,7 +50,7 @@ function changeTurn() {
   const symbolToSelect = !turn ? 'oCircle' : "xCross"
   $onTurn = document.querySelector(`.turn-indicator-box .${symbolToSelect}`);
   $onTurn.parentNode.classList.toggle("on-turn");
-  if (clickCounter<=5) {
+  if (clickCounter<=5 && clickCounter !== -1) {
     checkWinConditions(symbolToSelect);
   };
   turn = !turn;
@@ -78,6 +81,7 @@ function checkWinConditions(symbolToSelect) {
     setTimeout(() => {
       document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}`);
       document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
+      document.querySelector(`.winning-line`).classList.toggle(winningTurn ? "red-line" : "blue-line");
       setTimeout(() => {
         showWinScreen()
         document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
@@ -99,22 +103,28 @@ function showWinScreen() {
   document.querySelector(".replay-icon").classList.toggle("replay-icon-fade-in");
 }
 
-function resetBoard() {console.log(winningSymbol);
+function resetBoard() {
   if (isAnimating) {
-    setTimeout(() => {
-      resetBoard()
-    }, 200);
+    setTimeout(() => resetBoard(), 200);
   } else {
-    console.log(winningSymbol);
-    document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
-    document.querySelector(`.win-screen .white-box > div.won-text`).classList.toggle(winningSymbol ? "red-text" : "blue-text");
+    const $winnerSymbol = document.querySelector(`.win-screen .white-box > div.${winningSymbol}`)
+    $winnerSymbol && $winnerSymbol.classList.toggle("show-winner-symbol");
+    const $redText = document.querySelector(`.win-screen .white-box > div.won-text.red-text`)
+    $redText && $redText.classList.toggle("red-text");
+    const $blueText = document.querySelector(`.win-screen .white-box > div.won-text.blue-text`)
+    $blueText && $blueText.classList.toggle("blue-text");
     document.querySelector(".turn-indicator-box").style.display = "flex";
     document.querySelector(".win-screen").style.display = "none";
-    document.querySelector(".white-box").style.display = "none";
+    document.querySelector(`.winning-line`).classList.toggle(winningTurn ? "red-line" : "blue-line");
     document.querySelector(".replay-icon").classList.toggle("replay-icon-fade-in");
     document.getElementById("grid").style.opacity= "1";
     document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}`);
-    if(winningTurn) {
+    [...document.querySelectorAll(".box.x")].forEach(box => box.classList.toggle("x"));
+    [...document.querySelectorAll(".box.o")].forEach(box => box.classList.toggle("o"));
+    [...document.querySelectorAll(".box > .xCross")].forEach(box => box.classList.toggle("xCross"));
+    [...document.querySelectorAll(".box > .oCircle")].forEach(box => box.classList.toggle("oCircle"));
+    if(!winningTurn) {
+      clickCounter--;
       changeTurn()
     }
     clickCounter = 9;
@@ -122,5 +132,6 @@ function resetBoard() {console.log(winningSymbol);
     winConditionIndex = null;
     winningSymbol = null;
     winningTurn = null;
+    addBoxListener();
   }
 }

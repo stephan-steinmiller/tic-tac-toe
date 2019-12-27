@@ -67,7 +67,7 @@ body {
   display: block;
   margin-right: 56px;
 }
-.show-winner-symbol ~ .won-text, .show-winner-symbol ~ .draw-text {
+.show-winner-symbol ~ .won-text, .show-winner-symbol ~ .draw-text, .draw-text {
   display: block!important;
   font-size: 2rem;
   color: black;

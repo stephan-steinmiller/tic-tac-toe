@@ -67,10 +67,13 @@ body {
   display: block;
   margin-right: 56px;
 }
-.show-winner-symbol ~ .won-text, .show-winner-symbol ~ .draw-text, .draw-text {
+.show-winner-symbol ~ .won-text, .show-winner-symbol ~ .draw-text{
   display: block!important;
   font-size: 2rem;
   color: black;
+}
+.win-screen .white-box .draw-text {
+  font-size: 2rem;  
 }
 
 .win-screen .show-winner-symbol ~ .draw-text {

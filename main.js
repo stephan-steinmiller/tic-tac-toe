@@ -1,21 +1,28 @@
+let blue = "#4A7FFF";
+let red = "#FF4A7B";
+
 let turn = false;
+let beginningTurn = false;
 let clickCounter = 9;
 let hasWon = false;
+
 let winConditionIndex = null;
 let winningSymbol = null;
 let winningTurn = null;
-let isAnimating = false
+let isAnimating = false;
+let xWinningCounter = 0;
+let oWinningCounter = 0;
 
 const winConditions = [
-  //horizontal win conditions
+  // horizontal win conditions
   ["a1","a2","a3"],
   ["b1","b2","b3"],
   ["c1","c2","c3"],
-  //vertical win conditions
+  // vertical win conditions
   ["a1","b1","c1"],
   ["a2","b2","c2"],
   ["a3","b3","c3"],
-  //diagonal win conditions
+  // diagonal win conditions
   ["a1","b2","c3"],
   ["a3","b2","c1"],
 ];
@@ -30,7 +37,7 @@ function addBoxListener() {
   const boxList = [...$boxes]
   boxList.forEach((box) => {
     box.removeEventListener("click", fillBox)
-    box.addEventListener("click", fillBox, {once: true})
+    box.addEventListener("click", fillBox)
   });
 }
 
@@ -40,6 +47,8 @@ function fillBox(e) {
     const playerSymbol = turn ? 'oCircle' : "xCross"
     e.target.children[0].classList.add(playerSymbol);
     e.target.classList.add(turn ? 'o' : "x")
+    e.target.removeEventListener("click", fillBox)
+
     changeTurn();
   }
 }
@@ -50,11 +59,12 @@ function changeTurn() {
   const symbolToSelect = !turn ? 'oCircle' : "xCross"
   $onTurn = document.querySelector(`.turn-indicator-box .${symbolToSelect}`);
   $onTurn.parentNode.classList.toggle("on-turn");
+
   if (clickCounter<=5 && clickCounter !== -1) {
     checkWinConditions(symbolToSelect);
-  };
+  }
   turn = !turn;
-};
+}
 
 function checkWinConditions(symbolToSelect) {
   const symbolToCheck = turn ? "o" : "x";
@@ -72,29 +82,36 @@ function checkWinConditions(symbolToSelect) {
     return hasFoundWinner;
   });
   if (hasWon) {
-    //Win Condition is true
-    document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
+    // Win Condition is true
+    const $winningLine = document.querySelector('.winning-line')
+    $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
 
     winningTurn = turn
     winningSymbol = winningTurn ? 'oCircle' : "xCross"
+    const winningColor = winningTurn ? red : blue
     isAnimating = true
+
     setTimeout(() => {
-      document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}`);
-      document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
-      document.querySelector(`.winning-line`).classList.toggle(winningTurn ? "red-line" : "blue-line");
+      $winningLine.classList.toggle(`winning-condition-${winConditionIndex}`);
+      $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
+      $winningLine.style.color = winningColor
+
       setTimeout(() => {
         showWinScreen()
         document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
-        document.querySelector(`.win-screen .white-box > div.won-text`).classList.toggle(winningTurn ? "red-text" : "blue-text");
+        document.querySelector(".won-text").style.color = winningColor
+        document.querySelector('.replay-icon').style.color = winningColor
+        document.querySelector('.replay-icon').style.color = winningColor
         isAnimating = false
       }, 1000);
     }, 300);
-  } else if (clickCounter <= 0) {
-    //Draw Condition is true
+  } else if (!clickCounter) {
+    // Draw Condition is true
     showWinScreen()
     document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "block";
+    document.querySelector('.replay-icon').style.color = "black"
   }
-};
+}
 
 function showWinScreen() {
   document.querySelector(".turn-indicator-box").style.display = "none";
@@ -107,26 +124,26 @@ function resetBoard() {
   if (isAnimating) {
     setTimeout(() => resetBoard(), 200);
   } else {
-    const $winnerSymbol = document.querySelector(`.win-screen .white-box > div.${winningSymbol}`)
-    $winnerSymbol && $winnerSymbol.classList.toggle("show-winner-symbol");
-    const $redText = document.querySelector(`.win-screen .white-box > div.won-text.red-text`)
-    $redText && $redText.classList.toggle("red-text");
-    const $blueText = document.querySelector(`.win-screen .white-box > div.won-text.blue-text`)
-    $blueText && $blueText.classList.toggle("blue-text");
+
+    if(hasWon) {
+      document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
+      document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}`);
+    }
+
+    document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "none";
     document.querySelector(".turn-indicator-box").style.display = "flex";
     document.querySelector(".win-screen").style.display = "none";
-    document.querySelector(`.winning-line`).classList.toggle(winningTurn ? "red-line" : "blue-line");
     document.querySelector(".replay-icon").classList.toggle("replay-icon-fade-in");
     document.getElementById("grid").style.opacity= "1";
-    document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}`);
+
+    // removing all x and o's out of the boxes
     [...document.querySelectorAll(".box.x")].forEach(box => box.classList.toggle("x"));
     [...document.querySelectorAll(".box.o")].forEach(box => box.classList.toggle("o"));
     [...document.querySelectorAll(".box > .xCross")].forEach(box => box.classList.toggle("xCross"));
     [...document.querySelectorAll(".box > .oCircle")].forEach(box => box.classList.toggle("oCircle"));
-    if(!winningTurn) {
-      clickCounter--;
-      changeTurn()
-    }
+
+    beginningTurn = !beginningTurn;
+    turn = beginningTurn;
     clickCounter = 9;
     hasWon = false;
     winConditionIndex = null;

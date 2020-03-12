@@ -6,26 +6,9 @@
   --red-gradient: linear-gradient(to top left, #FF4A7B, #FF8585);
 }
 
-@media (max-width: 500px) {
-  * {
-    font-size: 25px;
-  }
-  .white-box {
-    max-width: 303px;
-  }
-  #grid {
-    max-height: 303px;
-    max-width: 303px;
-    grid-gap: 6px;
-  }
-  .box {
-    height: 97px;
-    width: 97px;
-  }
-}
-
 
 body {
+  padding: 0, 24;
   background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
@@ -39,6 +22,40 @@ body {
   font-family: 'Comfortaa';
   font-size: 50px;
 }
+
+header {
+  height: 240px;
+  width: 100vw;
+  background-color: white;
+  color: #505050;
+  font-size: 1.5rem;
+}
+
+.concave-header {
+  position: fixed;
+  height: 156px;
+  width: 100vw;
+  top: 160px;
+  z-index: 1;
+  background-color: var(--bg-color);
+  border-radius: 80px;
+}
+
+.game-icon {
+  height: 384px;
+  width: 384px;
+  background-color: white;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.start-button {
+  height: 112px;
+  width: 112px;
+  background-color: white;
+  border-radius: 50%;
+}
+
 
 .win-screen {
   display: none;
@@ -105,8 +122,6 @@ body {
   justify-content: center;
   align-items: center;
   background-color: white;
-
-  user-drag: none;
 }
 
 
@@ -128,7 +143,6 @@ body {
 }
 
 .x-turn {
-  margin-right: 50px;
   height: 3em;
   width: 3em;
   background: white;
@@ -194,7 +208,12 @@ body {
   background: white;
 }
 
-
+.xWonCounter:after {
+  content: ":";
+}
+.xWonCounter:after, .xWonCounter, .oWonCounter{
+  font-size: 84px;
+}
 
 .replay-icon {
   z-index: 4;

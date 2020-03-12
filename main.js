@@ -1,7 +1,14 @@
 let blue = "#4A7FFF";
 let red = "#FF4A7B";
 
+let gameMode = true;
+//  false means singleplayer
+//  true means local multiplayer
+
 let turn = false;
+//  false means x's turn
+//  true means y's turn
+let aiSymbol = true;
 let beginningTurn = false;
 let clickCounter = 9;
 let hasWon = false;
@@ -42,14 +49,55 @@ function addBoxListener() {
 }
 
 function fillBox(e) {
-  clickCounter--;
-  if (e.target.classList.contains("box") && !hasWon) {
-    const playerSymbol = turn ? 'oCircle' : "xCross"
-    e.target.children[0].classList.add(playerSymbol);
-    e.target.classList.add(turn ? 'o' : "x")
-    e.target.removeEventListener("click", fillBox)
+  if (!hasWon) {
+    clickCounter--;
+    const fillingPlayerSymbol = turn ? 'oCircle' : "xCross"
 
-    changeTurn();
+    if (e.target) {
+      //
+      let box = e.target
+      acuallyFillBox(box)
+      if (!gameMode) {
+        turnAI();
+      }
+    } else if (e.classList.contains("box")) {
+      //
+      let box = e
+      acuallyFillBox(box)
+    }
+
+    function acuallyFillBox(box) {
+      box.children[0].classList.add(fillingPlayerSymbol);
+      box.classList.add(turn ? 'o' : "x");
+      box.removeEventListener("click", fillBox);
+      changeTurn();
+    }
+  }
+}
+
+function turnAI() {
+  let $freeBoxes = [...document.querySelectorAll(`.box:not(.x):not(.o)`)];
+  let freeBoxesWithID = $freeBoxes.map(value => value.id);
+
+  let $aiCheckedBoxes = [...document.querySelectorAll(turn ? "o" : "x")];
+  let $humanCheckedBoxes = [...document.querySelectorAll(turn ? "x" : "o")];
+
+  aiHasNearlyWon = winConditions.some((winCondition, index) => {
+    const hasFoundNearlyWinner = winCondition.filter((id) => {
+      return $aiCheckedBoxes.includes(id);
+    })
+    console.log(hasFoundNearlyWinner);
+    return hasFoundNearlyWinner;
+  });
+  console.log(aiHasNearlyWon);
+
+  if (false) {
+
+  } else if (false) {
+
+  } else {
+    let randomBox = freeBoxesWithID[Math.floor(Math.random() * freeBoxesWithID.length)];
+    fillBox(document.getElementById(randomBox));
   }
 }
 
@@ -61,55 +109,62 @@ function changeTurn() {
   $onTurn.parentNode.classList.toggle("on-turn");
 
   if (clickCounter<=5 && clickCounter !== -1) {
-    checkWinConditions(symbolToSelect);
+    checkWinConditions();
   }
   turn = !turn;
 }
 
-function checkWinConditions(symbolToSelect) {
+function checkWinConditions() {
   const symbolToCheck = turn ? "o" : "x";
+  // finding all boxes with the current Symbol
   let $boxes = [...document.querySelectorAll(`.box.${symbolToCheck}`)];
-  let filledPlayerBoxes = $boxes.map(function(value) {
-    return value.id;
-  })
+  // puting the ID's into an Array
+  let filledPlayerBoxes = $boxes.map( value => value.id)
+  //
   hasWon = winConditions.some((winCondition, index) => {
     const hasFoundWinner = winCondition.every((id) => {
       return filledPlayerBoxes.includes(id);
     })
     if (hasFoundWinner) {
-      winConditionIndex = index
+      winConditionIndex = index;
     }
     return hasFoundWinner;
   });
   if (hasWon) {
     // Win Condition is true
+    winningTurn = turn;
+
+    winningTurn ? oWinningCounter++ : xWinningCounter++;
+    winningCounterToChange = winningTurn ? 'oWonCounter' : "xWonCounter";
+    winningCounterNumber = winningTurn ? oWinningCounter : xWinningCounter;
+    document.querySelector(`.${winningCounterToChange}`).innerHTML  = winningCounterNumber;
+
     const $winningLine = document.querySelector('.winning-line')
     $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
 
-    winningTurn = turn
-    winningSymbol = winningTurn ? 'oCircle' : "xCross"
-    const winningColor = winningTurn ? red : blue
-    isAnimating = true
+    winningSymbol = winningTurn ? 'oCircle' : "xCross";
+    const winningColor = winningTurn ? red : blue;
+    isAnimating = true;
 
     setTimeout(() => {
       $winningLine.classList.toggle(`winning-condition-${winConditionIndex}`);
       $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
-      $winningLine.style.color = winningColor
+      $winningLine.style.color = winningColor;
 
       setTimeout(() => {
-        showWinScreen()
+        showWinScreen();
         document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
-        document.querySelector(".won-text").style.color = winningColor
-        document.querySelector('.replay-icon').style.color = winningColor
-        document.querySelector('.replay-icon').style.color = winningColor
-        isAnimating = false
+        document.querySelector(".won-text").style.color = winningColor;
+        document.querySelector('.replay-icon').style.color = winningColor;
+        document.querySelector('.replay-icon').style.color = winningColor;
+        isAnimating = false;
       }, 1000);
     }, 300);
   } else if (!clickCounter) {
     // Draw Condition is true
-    showWinScreen()
+    showWinScreen();
     document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "block";
-    document.querySelector('.replay-icon').style.color = "black"
+    document.querySelector('.replay-icon').style.color = "black";
   }
 }
 
@@ -150,5 +205,8 @@ function resetBoard() {
     winningSymbol = null;
     winningTurn = null;
     addBoxListener();
+    if (!gameMode && aiSymbol == turn) {
+      turnAI();
+    }
   }
 }

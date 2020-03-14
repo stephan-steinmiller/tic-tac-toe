@@ -1,13 +1,13 @@
 let blue = "#4A7FFF";
 let red = "#FF4A7B";
 
-let gameMode = true;
+let gameMode = false;
 //  false means singleplayer
 //  true means local multiplayer
 
 let turn = false;
 //  false means x's turn
-//  true means y's turn
+//  true means o's turn
 let aiSymbol = true;
 let beginningTurn = false;
 let clickCounter = 9;
@@ -57,7 +57,7 @@ function fillBox(e) {
       //
       let box = e.target
       acuallyFillBox(box)
-      if (!gameMode) {
+      if (!gameMode && clickCounter > 0) {
         turnAI();
       }
     } else if (e.classList.contains("box")) {
@@ -76,25 +76,53 @@ function fillBox(e) {
 }
 
 function turnAI() {
-  let $freeBoxes = [...document.querySelectorAll(`.box:not(.x):not(.o)`)];
-  let freeBoxesWithID = $freeBoxes.map(value => value.id);
+  let freeBoxesWithID = [...document.querySelectorAll(`.box:not(.x):not(.o)`)].map(value => value.id);
 
-  let $aiCheckedBoxes = [...document.querySelectorAll(turn ? "o" : "x")];
-  let $humanCheckedBoxes = [...document.querySelectorAll(turn ? "x" : "o")];
+  let aiCheckedBoxes = [...document.querySelectorAll(aiSymbol ? ".o" : ".x")].map( value => value.id);
+  let humanCheckedBoxes = [...document.querySelectorAll(aiSymbol ? ".x" : ".o")].map( value => value.id);
 
-  aiHasNearlyWon = winConditions.some((winCondition, index) => {
-    const hasFoundNearlyWinner = winCondition.filter((id) => {
-      return $aiCheckedBoxes.includes(id);
+  let matchingBoxesToWin = 0;
+  let hasFreeBox = false;
+  let freeBoxAiCloseToWinID = null;
+  let freeBoxHumanCloseToWinID = null;
+
+  aiHasAlmostWon = winConditions.some((winCondition, index) => {
+    winCondition.forEach((id) => {
+      if(aiCheckedBoxes.includes(id)) {matchingBoxesToWin++}
+      if(freeBoxesWithID.includes(id)) {hasFreeBox = true; freeBoxAiCloseToWinID = id}
     })
-    console.log(hasFoundNearlyWinner);
-    return hasFoundNearlyWinner;
+    let foundNearlyWonIndex = (matchingBoxesToWin == 2 && hasFreeBox == true);
+    if(foundNearlyWonIndex) {
+      let aiCloseToWinIndex = index;
+    } else {
+      matchingBoxesToWin = 0;
+      hasFreeBox = false;
+      freeBoxAiCloseToWinID = null;
+    }
+    return foundNearlyWonIndex
   });
-  console.log(aiHasNearlyWon);
 
-  if (false) {
+  humanHasAlmostWon = winConditions.some((winCondition, index) => {
+    winCondition.forEach((id) => {
+      if(humanCheckedBoxes.includes(id)) {matchingBoxesToWin++}
+      if(freeBoxesWithID.includes(id)) {hasFreeBox = true; freeBoxHumanCloseToWinID = id}
+    })
+    let foundNearlyWonIndex = (matchingBoxesToWin == 2 && hasFreeBox == true);
+    if(foundNearlyWonIndex) {
+      let humanCloseToWinIndex = index;
+    } else {
+      matchingBoxesToWin = 0;
+      hasFreeBox = false;
+      freeBoxHumanCloseToWinID = null;
+    }
+    return foundNearlyWonIndex
+  });
 
-  } else if (false) {
 
+  if (aiHasAlmostWon) {
+    fillBox(document.getElementById(freeBoxAiCloseToWinID));
+  } else if (humanHasAlmostWon) {
+    fillBox(document.getElementById(freeBoxHumanCloseToWinID));
   } else {
     let randomBox = freeBoxesWithID[Math.floor(Math.random() * freeBoxesWithID.length)];
     fillBox(document.getElementById(randomBox));
@@ -108,7 +136,7 @@ function changeTurn() {
   $onTurn = document.querySelector(`.turn-indicator-box .${symbolToSelect}`);
   $onTurn.parentNode.classList.toggle("on-turn");
 
-  if (clickCounter<=5 && clickCounter !== -1) {
+  if (clickCounter<=5 && clickCounter >= 0) {
     checkWinConditions();
   }
   turn = !turn;
@@ -204,8 +232,9 @@ function resetBoard() {
     winConditionIndex = null;
     winningSymbol = null;
     winningTurn = null;
+
     addBoxListener();
-    if (!gameMode && aiSymbol == turn) {
+    if (!gameMode && aiSymbol == beginningTurn) {
       turnAI();
     }
   }

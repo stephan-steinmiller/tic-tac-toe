@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="transitions.css">
     <script src="main.js"></script>
-    <!-- back end 
+    <!-- back end
     <script src="/socket.io/socket.io.js"></script>
     <script defer src="socketScriptForGame.js"></script>
     -->
     <!-- font -->
     <link rel="preload" as="font" href="/assets/fonts/Comfortaa-Regular.ttf" type="font/woff2" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
   </head>
 
   <body>
@@ -112,6 +112,31 @@
         </div>
       </div>
     </div>
+
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.15.0/firebase-analytics.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyCV5KLTGRQkJPGiyMdGSeDtJ2CYdAesa_c",
+        authDomain: "tic-tac-toe-906f9.firebaseapp.com",
+        databaseURL: "https://tic-tac-toe-906f9.firebaseio.com",
+        projectId: "tic-tac-toe-906f9",
+        storageBucket: "tic-tac-toe-906f9.appspot.com",
+        messagingSenderId: "658901886296",
+        appId: "1:658901886296:web:00b53af0c3a36218ebf12d",
+        measurementId: "G-5X6BS3NF73"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
   </body>
 
 </html>

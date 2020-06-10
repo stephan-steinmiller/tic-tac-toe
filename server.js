@@ -1,7 +1,7 @@
 const socketio = require('socket.io')
 const express = require('express')
 const { GAME_STATES } = require('./serverConstants')
-//const io = require('socket.io')(3000)
+// const io = require('socket.io')(3000)
 
 
 const app = express()
@@ -29,8 +29,6 @@ let pendingPlayers = []
 io.on('connection', socket => {
     let registeredPlayer = null;
     console.log('new User');
-    socket.on('chat-message', (message) => {
-    })
     socket.on('register-player', playerName => {
         registeredPlayer = playerName;
 

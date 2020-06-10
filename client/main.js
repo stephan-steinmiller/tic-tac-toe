@@ -40,12 +40,12 @@ const winConditions = [
 
 
 window.onload = function () {
-  /*  Back-End Communication
+  //  Back-End Communication
   window.connect()
   window.gameSocket.on('set-field', () => {
     // your custom code to set a field 
   })
-  window.gameSocket.emit('set-field', '{field: 1}')*/
+  window.gameSocket.emit('set-field', '{field: 1}')
 
   // [...document.getElementsByClassName('menu-button')].forEach((button) => {
   //   console.log(button);    

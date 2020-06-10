@@ -1,11 +1,15 @@
+const GAME_MODES = {
+  SINGLEPLAYER: 'singleplayer',
+  LOCAL_MULTIPLAYER: 'localMultiplayer',
+  ONLINE_MULTIPLAYER: 'onlineMultiplayer',
+}
+
 let blue = "#4A7FFF";
 let red = "#FF4A7B";
 
-let gameMode = false;
-//  false means singleplayer
-//  true means local multiplayer
+let gameMode = String();
 
-let turn = false;
+let oTurn = false;
 //  false means x's turn
 //  true means o's turn
 let aiSymbol = true;
@@ -34,10 +38,57 @@ const winConditions = [
   ["a3","b2","c1"],
 ];
 
+
 window.onload = function () {
-  addBoxListener();
-  document.querySelector(".replay-icon").addEventListener("click", resetBoard);
+  /*  Back-End Communication
+  window.connect()
+  window.gameSocket.on('set-field', () => {
+    // your custom code to set a field 
+  })
+  window.gameSocket.emit('set-field', '{field: 1}')*/
+
+  // [...document.getElementsByClassName('menu-button')].forEach((button) => {
+  //   console.log(button);    
+  //   button.addEventListener("click", handleMenuButton(button.classList))
+  // });
 }
+
+function handleMenuButton(classList) {
+  let tmpGameMode = gameMode;
+  switch ([...classList].pop()) {
+    case GAME_MODES.SINGLEPLAYER:
+      gameMode = GAME_MODES.SINGLEPLAYER;
+      break;
+    case GAME_MODES.LOCAL_MULTIPLAYER:
+      gameMode = GAME_MODES.LOCAL_MULTIPLAYER;
+      break;
+    case GAME_MODES.ONLINE_MULTIPLAYER:
+      gameMode = GAME_MODES.ONLINE_MULTIPLAYER;
+      break;
+  }
+  if (clickCounter === 9) {
+    addBoxListener();
+  } else if(tmpGameMode !== gameMode) {
+    let oTurn = false;
+    let xWinningCounter = 0;
+    let oWinningCounter = 0;
+    resetBoard();
+  }
+  unShowGameMenu();
+}
+
+function showGameMenu() {
+  document.querySelector('.game-menu').style.display = "flex";
+  let $backIcon = document.querySelector('.back-icon');
+  $backIcon.removeEventListener("click", showGameMenu)
+}
+function unShowGameMenu() {
+  document.querySelector('.game-menu').style.display = "none";
+  let $backIcon = document.querySelector('.back-icon');
+  $backIcon.addEventListener("click", showGameMenu)
+}
+
+
 
 function addBoxListener() {
   let $boxes = document.getElementsByClassName('box');
@@ -51,13 +102,12 @@ function addBoxListener() {
 function fillBox(e) {
   if (!hasWon) {
     clickCounter--;
-    const fillingPlayerSymbol = turn ? 'oCircle' : "xCross"
 
     if (e.target) {
       //
       let box = e.target
       acuallyFillBox(box)
-      if (!gameMode && clickCounter > 0) {
+      if (gameMode == GAME_MODES.SINGLEPLAYER && clickCounter > 0) {
         turnAI();
       }
     } else if (e.classList.contains("box")) {
@@ -67,8 +117,8 @@ function fillBox(e) {
     }
 
     function acuallyFillBox(box) {
-      box.children[0].classList.add(fillingPlayerSymbol);
-      box.classList.add(turn ? 'o' : "x");
+      box.children[0].classList.add();
+      box.classList.add(oTurn ? 'o-nought' : "x-cross");
       box.removeEventListener("click", fillBox);
       changeTurn();
     }
@@ -76,52 +126,59 @@ function fillBox(e) {
 }
 
 function turnAI() {
-  let freeBoxesWithID = [...document.querySelectorAll(`.box:not(.x):not(.o)`)].map(value => value.id);
+  let freeBoxesWithID = [...document.querySelectorAll(`.box:not(.x-cross):not(.o-nought)`)].map(value => value.id);
 
-  let aiCheckedBoxes = [...document.querySelectorAll(aiSymbol ? ".o" : ".x")].map( value => value.id);
-  let humanCheckedBoxes = [...document.querySelectorAll(aiSymbol ? ".x" : ".o")].map( value => value.id);
+  let aiCheckedBoxes = [...document.querySelectorAll(aiSymbol ? ".o-nought" : ".x-cross")].map( value => value.id);
+  let humanCheckedBoxes = [...document.querySelectorAll(aiSymbol ? ".x-cross" : ".o-nought")].map( value => value.id);
 
   let matchingBoxesToWin = 0;
   let hasFreeBox = false;
   let freeBoxAiCloseToWinID = null;
   let freeBoxHumanCloseToWinID = null;
 
-  aiHasAlmostWon = winConditions.some((winCondition, index) => {
-    winCondition.forEach((id) => {
-      if(aiCheckedBoxes.includes(id)) {matchingBoxesToWin++}
-      if(freeBoxesWithID.includes(id)) {hasFreeBox = true; freeBoxAiCloseToWinID = id}
-    })
-    let foundNearlyWonIndex = (matchingBoxesToWin == 2 && hasFreeBox == true);
-    if(foundNearlyWonIndex) {
-      let aiCloseToWinIndex = index;
-    } else {
-      matchingBoxesToWin = 0;
-      hasFreeBox = false;
-      freeBoxAiCloseToWinID = null;
-    }
-    return foundNearlyWonIndex
-  });
+  let aiHasAlmostWon = function() {
+    return winConditions.some((winCondition, index) => {
+      winCondition.forEach((id) => {
+        if(aiCheckedBoxes.includes(id)) {matchingBoxesToWin++}
+        if(freeBoxesWithID.includes(id)) {hasFreeBox = true; freeBoxAiCloseToWinID = id}
+      })
+      let foundNearlyWonIndex = (matchingBoxesToWin == 2 && hasFreeBox == true);
+      if(foundNearlyWonIndex) {
+        let aiCloseToWinIndex = index;
+      } else {
+        matchingBoxesToWin = 0;
+        hasFreeBox = false;
+        freeBoxAiCloseToWinID = null;
+      }
+      return foundNearlyWonIndex
+    });
+  }
 
-  humanHasAlmostWon = winConditions.some((winCondition, index) => {
-    winCondition.forEach((id) => {
-      if(humanCheckedBoxes.includes(id)) {matchingBoxesToWin++}
-      if(freeBoxesWithID.includes(id)) {hasFreeBox = true; freeBoxHumanCloseToWinID = id}
-    })
-    let foundNearlyWonIndex = (matchingBoxesToWin == 2 && hasFreeBox == true);
-    if(foundNearlyWonIndex) {
-      let humanCloseToWinIndex = index;
-    } else {
-      matchingBoxesToWin = 0;
-      hasFreeBox = false;
-      freeBoxHumanCloseToWinID = null;
-    }
-    return foundNearlyWonIndex
-  });
+  let humanHasAlmostWon = function() {
+    return winConditions.some((winCondition, index) => {
+      winCondition.forEach((id) => {
+        if(humanCheckedBoxes.includes(id)) {matchingBoxesToWin++}
+        if(freeBoxesWithID.includes(id)) {hasFreeBox = true; freeBoxHumanCloseToWinID = id}
+      })
+      let foundNearlyWonIndex = (matchingBoxesToWin == 2 && hasFreeBox == true);
+      if(foundNearlyWonIndex) {
+        let humanCloseToWinIndex = index;
+      } else {
+        matchingBoxesToWin = 0;
+        hasFreeBox = false;
+        freeBoxHumanCloseToWinID = null;
+      }
+      return foundNearlyWonIndex
+    });
+  }
 
+  let randomMistake = () => {
+    return (Math.floor(Math.random()*10));
+  }
 
-  if (aiHasAlmostWon) {
+  if (randomMistake() && aiHasAlmostWon()) {
     fillBox(document.getElementById(freeBoxAiCloseToWinID));
-  } else if (humanHasAlmostWon) {
+  } else if (randomMistake() && humanHasAlmostWon()) {
     fillBox(document.getElementById(freeBoxHumanCloseToWinID));
   } else {
     let randomBox = freeBoxesWithID[Math.floor(Math.random() * freeBoxesWithID.length)];
@@ -132,18 +189,18 @@ function turnAI() {
 function changeTurn() {
   let $onTurn = document.querySelector(".on-turn");
   $onTurn.classList.toggle("on-turn");
-  const symbolToSelect = !turn ? 'oCircle' : "xCross"
-  $onTurn = document.querySelector(`.turn-indicator-box .${symbolToSelect}`);
-  $onTurn.parentNode.classList.toggle("on-turn");
+  const turnToToggle = !oTurn ? 'o-turn' : "x-turn"
+  $onTurn = document.querySelector(`.turn-indicator-box .${turnToToggle}`);
+  $onTurn.classList.toggle("on-turn");
 
   if (clickCounter<=5 && clickCounter >= 0) {
     checkWinConditions();
   }
-  turn = !turn;
+  oTurn = !oTurn;
 }
 
 function checkWinConditions() {
-  const symbolToCheck = turn ? "o" : "x";
+  const symbolToCheck = oTurn ? "o-nought" : "x-cross";
   // finding all boxes with the current Symbol
   let $boxes = [...document.querySelectorAll(`.box.${symbolToCheck}`)];
   // puting the ID's into an Array
@@ -160,47 +217,50 @@ function checkWinConditions() {
   });
   if (hasWon) {
     // Win Condition is true
-    winningTurn = turn;
+    winningTurn = oTurn;
 
     winningTurn ? oWinningCounter++ : xWinningCounter++;
-    winningCounterToChange = winningTurn ? 'oWonCounter' : "xWonCounter";
+    winningCounterToChange = winningTurn ? 'o-win-counter' : "x-win-counter";
     winningCounterNumber = winningTurn ? oWinningCounter : xWinningCounter;
     document.querySelector(`.${winningCounterToChange}`).innerHTML  = winningCounterNumber;
 
-    const $winningLine = document.querySelector('.winning-line')
+    let $winningLine = document.querySelector(`.winning-line.condition-${winConditionIndex}`)
     $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
 
-    winningSymbol = winningTurn ? 'oCircle' : "xCross";
+    winningSymbol = winningTurn ? 'o-nought' : "x-cross";
     const winningColor = winningTurn ? red : blue;
     isAnimating = true;
 
     setTimeout(() => {
-      $winningLine.classList.toggle(`winning-condition-${winConditionIndex}`);
-      $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
       $winningLine.style.color = winningColor;
+      $winningLine.classList.toggle(`winning-condition-${winConditionIndex}`);
 
       setTimeout(() => {
         showWinScreen();
         document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
         document.querySelector(".won-text").style.color = winningColor;
-        document.querySelector('.replay-icon').style.color = winningColor;
-        document.querySelector('.replay-icon').style.color = winningColor;
-        isAnimating = false;
+        document.querySelector('.play-again-icon').style.color = winningColor;
       }, 1000);
     }, 300);
+    $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
+    isAnimating = false;
   } else if (!clickCounter) {
     // Draw Condition is true
     showWinScreen();
     document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "block";
-    document.querySelector('.replay-icon').style.color = "black";
+    document.querySelector('.play-again-icon').style.color = "black";
   }
 }
 
 function showWinScreen() {
-  document.querySelector(".turn-indicator-box").style.display = "none";
+  document.querySelector("#grid").classList.add('blur');
+  document.querySelector(".on-turn").classList.add('color');
+  document.querySelector(".column").classList.add('reverse');
+  document.querySelector(".turn-indicator-box").classList.add("show-container");
   document.querySelector(".win-screen").style.display = "flex";
   document.getElementById("grid").style.opacity= "0.5";
-  document.querySelector(".replay-icon").classList.toggle("replay-icon-fade-in");
+  document.querySelector(".play-again-icon").classList.toggle("play-again-icon-fade-in");
+  document.querySelector(".play-again-icon").addEventListener("click", resetBoard);
 }
 
 function resetBoard() {
@@ -209,24 +269,26 @@ function resetBoard() {
   } else {
 
     if(hasWon) {
-      document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.toggle("show-winner-symbol");
-      document.querySelector(`.winning-line`).classList.toggle(`winning-condition-${winConditionIndex}`);
+      document.querySelector(`.win-screen .white-box > div.${winningSymbol}`).classList.remove("show-winner-symbol");
+      document.querySelector(`.winning-condition-${winConditionIndex}`).classList.remove(`winning-condition-${winConditionIndex}`);
     }
 
+    //  unset win Screen
+    document.querySelector("#grid").classList.remove('blur');
+    document.querySelector(".on-turn").classList.remove('color');
+    document.querySelector(".column").classList.remove('reverse');
+    document.querySelector(".turn-indicator-box").classList.remove('show-container');
     document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "none";
-    document.querySelector(".turn-indicator-box").style.display = "flex";
     document.querySelector(".win-screen").style.display = "none";
-    document.querySelector(".replay-icon").classList.toggle("replay-icon-fade-in");
+    document.querySelector(".play-again-icon").classList.remove("play-again-icon-fade-in");
     document.getElementById("grid").style.opacity= "1";
 
-    // removing all x and o's out of the boxes
-    [...document.querySelectorAll(".box.x")].forEach(box => box.classList.toggle("x"));
-    [...document.querySelectorAll(".box.o")].forEach(box => box.classList.toggle("o"));
-    [...document.querySelectorAll(".box > .xCross")].forEach(box => box.classList.toggle("xCross"));
-    [...document.querySelectorAll(".box > .oCircle")].forEach(box => box.classList.toggle("oCircle"));
+    // removing all x-cross'es and o-nought's out of the boxes
+    [...document.querySelectorAll(".box.x-cross")].forEach(box => box.classList.remove("x-cross"));
+    [...document.querySelectorAll(".box.o-nought")].forEach(box => box.classList.remove("o-nought"));
 
     beginningTurn = !beginningTurn;
-    turn = beginningTurn;
+    oTurn = beginningTurn;
     clickCounter = 9;
     hasWon = false;
     winConditionIndex = null;
@@ -234,8 +296,8 @@ function resetBoard() {
     winningTurn = null;
 
     addBoxListener();
-    if (!gameMode && aiSymbol == beginningTurn) {
-      turnAI();
+    if (gameMode === GAME_MODES.SINGLEPLAYER && aiSymbol == beginningTurn) {
+      turnAI();      
     }
   }
 }

@@ -69,9 +69,11 @@ function handleMenuButton(classList) {
   if (clickCounter === 9) {
     addBoxListener();
   } else if(tmpGameMode !== gameMode) {
-    let oTurn = false;
-    let xWinningCounter = 0;
-    let oWinningCounter = 0;
+    oTurn = false;
+    xWinningCounter = 0;
+    oWinningCounter = 0;
+    document.querySelector(`.x-win-counter`).innerHTML  = xWinningCounter;
+    document.querySelector(`.o-win-counter`).innerHTML  = oWinningCounter;
     resetBoard();
   }
   unShowGameMenu();

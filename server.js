@@ -14,39 +14,46 @@ console.log(`Server listening on port ${port}`)
 const io = socketio(expressServer)
 
 
-const PLAYER_SESSION_TIMEOUT = 5000
+const PLAYER_SESSION_TIMEOUT = 10000
 let onlinePlayers = {
-    // Player1231231231: { name: Player1231231231, match: 'match1' }
-    // Player123121: { name: Player1231121231, match: 'match1' }
+    // Player5649893: { name: 'Player5649893', match: 'match1', sign: 'x' }
+    // Player5673940: { name: 'Player5673940', match: 'match1', sign: 'o' }
 }
 
 let games = {
     totalMatches: 0
+    // matchName: {
+    //     xPlayer,
+    //     oPlayer,
+    //     status: GAME_STATES.ACTIVE,
+    // }
 };
 
 let pendingPlayers = []
 
 io.on('connection', socket => {
+    let matchName;
     let registeredPlayer = null;
-    console.log('new User');
+    console.log('new connection');
     socket.on('register-player', playerName => {
         registeredPlayer = playerName;
 
         if(!onlinePlayers[registeredPlayer]) {
-            console.log('player name registered: ' + playerName);
             pendingPlayers.push(registeredPlayer);
+            console.log('player name registered: ' + playerName);
 
             console.log('myPlayerObject: ', onlinePlayers[registeredPlayer]);
             
             if(!onlinePlayers[registeredPlayer]) {
-                onlinePlayers[registeredPlayer] = { name: registeredPlayer, match: null }
+                onlinePlayers[registeredPlayer] = { name: registeredPlayer, match: null, sign: null }
             }
 
             if(pendingPlayers.length >= 2) {
+                
                 let xPlayer = pendingPlayers.shift()
                 let oPlayer = pendingPlayers.shift()
                 games.totalMatches++;
-                const matchName = 'match' + games.totalMatches
+                matchName = `match-${games.totalMatches}`
 
                 games[matchName] = {
                     xPlayer,
@@ -54,14 +61,17 @@ io.on('connection', socket => {
                     status: GAME_STATES.ACTIVE
                 }
                 
-                onlinePlayers[xPlayer] = { name: xPlayer, match: matchName }
-                onlinePlayers[oPlayer] = { name: oPlayer, match: matchName }
+                onlinePlayers[xPlayer] = { name: xPlayer, match: matchName, sign: 'x' }
+                onlinePlayers[oPlayer] = { name: oPlayer, match: matchName, sign: 'o' }
                 console.log(games);
+                
+                socket.emit('match-created', games[matchName])
+                socket.broadcast.emit('match-created', games[matchName])
             }
         } else {
             const currentTimestamp = Date.now()
             if(currentTimestamp - PLAYER_SESSION_TIMEOUT < onlinePlayers[registeredPlayer].disconnectedAt) {
-                delete onlinePlayers[registeredPlayer].disconnectedAt
+                delete onlinePlayers[registeredPlayer]
             }
         }
     })
@@ -74,9 +84,10 @@ io.on('connection', socket => {
 
         setTimeout(() => {
             if (onlinePlayers[registeredPlayer] && onlinePlayers[registeredPlayer].disconnectedAt) {
+                deleteMatch(onlinePlayers[registeredPlayer].match);
                 delete onlinePlayers[registeredPlayer]
                 console.log('user will be deleted: ' + registeredPlayer);
-                console.log('player after disconnect; ', onlinePlayers);
+                console.log('player after disconnect: ', onlinePlayers);
                 registeredPlayer = null;
             }
         }, PLAYER_SESSION_TIMEOUT)
@@ -84,9 +95,30 @@ io.on('connection', socket => {
         console.log(onlinePlayers);
     
     });
-    socket.on('set-field', function (move) {
+    socket.on('set-field', move => {
         // one of the players made a move
         console.log(move);
-        
+        socket.broadcast.emit('field', move);
     });
 })
+
+function deleteMatch(matchName) {
+    if (games[matchName].xPlayer) {
+        let xPlayer = games[matchName].xPlayer;
+    }
+    if (games[matchName].oPlayer) {
+        let oPlayer = games[matchName].oPlayer;
+    }
+    if ((onlinePlayers[xPlayer])) {
+        onlinePlayers[xPlayer].match = null;
+        pendingPlayers.push(xPlayer)
+    }
+    if ((onlinePlayers[oPlayer])) {
+        onlinePlayers[oPlayer].match = null;
+        pendingPlayers.push(oPlayer)
+    }
+    delete games[matchName];
+    games.totalMatches--;
+}
+
+

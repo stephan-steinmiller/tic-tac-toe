@@ -4,6 +4,8 @@ const GAME_MODES = {
   ONLINE_MULTIPLAYER: 'onlineMultiplayer',
 }
 
+let gameSocket = null;
+
 let blue = "#4A7FFF";
 let red = "#FF4A7B";
 
@@ -13,6 +15,7 @@ let oTurn = false;
 //  false means x's turn
 //  true means o's turn
 let aiSymbol = true;
+let myTurn = null;
 let beginningTurn = false;
 let clickCounter = 9;
 let hasWon = false;
@@ -38,15 +41,39 @@ const winConditions = [
   ["a3","b2","c1"],
 ];
 
+function startOnlineMultiplayer() {
+  const socket = io('http://localhost:3000')
+  const playerUuid = uuidv4();
+
+  const playerName = localStorage.getItem('playerName') || 'Player-'+ playerUuid
+
+  localStorage.setItem('playerName', playerName)
+  socket.emit('register-player', playerName)
+
+  socket.on('match-created', matchObject => {
+    console.log(matchObject.xPlayer == playerName ? `xPlayer` : 'oPlayer' );
+
+    if (matchObject.xPlayer == playerName) {
+      // do first move
+      myTurn = true;
+      document.querySelector('.unclickable-overlay').style.display = "none"
+    } else if (matchObject.oPlayer == playerName) {
+      // await first move
+      myTurn = false;
+    }
+    socket.on('field', (move) => {
+      console.log(`got that: ${move}`);
+      console.log(document.getElementById(move));
+      // your custom code to set a field
+      fillBoxByID(move);
+      myTurn = true;
+      document.querySelector('.unclickable-overlay').style.display = "none"
+    })
+  });
+  gameSocket = socket;
+}
 
 window.onload = function () {
-  //  Back-End Communication
-  window.connect()
-  window.gameSocket.on('set-field', () => {
-    // your custom code to set a field 
-  })
-  window.gameSocket.emit('set-field', '{field: 1}')
-
   // [...document.getElementsByClassName('menu-button')].forEach((button) => {
   //   console.log(button);    
   //   button.addEventListener("click", handleMenuButton(button.classList))
@@ -64,6 +91,8 @@ function handleMenuButton(classList) {
       break;
     case GAME_MODES.ONLINE_MULTIPLAYER:
       gameMode = GAME_MODES.ONLINE_MULTIPLAYER;
+      document.querySelector('.unclickable-overlay').style.display = "block"
+      startOnlineMultiplayer();
       break;
   }
   if (clickCounter === 9) {
@@ -96,35 +125,40 @@ function addBoxListener() {
   let $boxes = document.getElementsByClassName('box');
   const boxList = [...$boxes]
   boxList.forEach((box) => {
-    box.removeEventListener("click", fillBox)
-    box.addEventListener("click", fillBox)
+    box.removeEventListener("click", fillBoxByTarget)
+    box.addEventListener("click", fillBoxByTarget)
   });
 }
 
-function fillBox(e) {
+function fillBoxByTarget(e) {
   if (!hasWon) {
+    if (gameMode == GAME_MODES.ONLINE_MULTIPLAYER && myTurn) {
+      gameSocket.emit('set-field', e.target.id)
+
+      document.querySelector('.unclickable-overlay').style.display = "block"
+      myTurn = !myTurn
+    }
     clickCounter--;
 
-    if (e.target) {
-      //
-      let box = e.target
-      acuallyFillBox(box)
-      if (gameMode == GAME_MODES.SINGLEPLAYER && clickCounter > 0) {
-        turnAI();
-      }
-    } else if (e.classList.contains("box")) {
-      //
-      let box = e
-      acuallyFillBox(box)
-    }
+    let box = e.target
 
-    function acuallyFillBox(box) {
-      box.children[0].classList.add();
-      box.classList.add(oTurn ? 'o-nought' : "x-cross");
-      box.removeEventListener("click", fillBox);
-      changeTurn();
+    box.classList.add(oTurn ? 'o-nought' : "x-cross");
+    box.removeEventListener("click", fillBoxByTarget);
+    changeTurn();
+    if (gameMode == GAME_MODES.SINGLEPLAYER && clickCounter > 0) {
+      turnAI();
     }
   }
+}
+
+function fillBoxByID(id) {
+  clickCounter--;
+
+  let box = document.getElementById(id);
+
+  box.classList.add(oTurn ? 'o-nought' : "x-cross");
+  box.removeEventListener("click", fillBoxByTarget);
+  changeTurn();
 }
 
 function turnAI() {
@@ -179,12 +213,12 @@ function turnAI() {
   }
 
   if (randomMistake() && aiHasAlmostWon()) {
-    fillBox(document.getElementById(freeBoxAiCloseToWinID));
+    fillBoxByID(freeBoxAiCloseToWinID);
   } else if (randomMistake() && humanHasAlmostWon()) {
-    fillBox(document.getElementById(freeBoxHumanCloseToWinID));
+    fillBoxByID(freeBoxHumanCloseToWinID);
   } else {
     let randomBox = freeBoxesWithID[Math.floor(Math.random() * freeBoxesWithID.length)];
-    fillBox(document.getElementById(randomBox));
+    fillBoxByID(randomBox);
   }
 }
 

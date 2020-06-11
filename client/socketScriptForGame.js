@@ -6,17 +6,16 @@ window.connect = () => {
 
     localStorage.setItem('playerName', playerName)
 
-    socket.on('chat-message', data => {
-        console.log(data);
-    })
-
+    
+  socket.on('match-created', matchObject => {
+    console.log(matchObject.xPlayer);
+    window.firstMove = (matchObject.xPlayer == playerName) ? true : false;
+    //const match = JSON.parse(matchString)
+    //'{matchName:"match1", Player123123213Symbol:"x",Player43243434Symbol:"o"}'
+    //window.match = match
+  })
+    
     socket.emit('register-player', playerName)
-    socket.emit('chat-message', playerName)
 
-    socket.on('match-created', matchString => {
-        const match = JSON.parse(matchString)
-        //'{matchName:"match1", Player123123213Symbol:"x",Player43243434Symbol:"o"}'
-        window.match = match
-    })
     window.gameSocket = socket
 }

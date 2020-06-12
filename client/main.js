@@ -5,6 +5,7 @@ const GAME_MODES = {
 }
 
 let gameSocket = null;
+let myTurn = null;
 
 let blue = "#4A7FFF";
 let red = "#FF4A7B";
@@ -15,7 +16,7 @@ let oTurn = false;
 //  false means x's turn
 //  true means o's turn
 let aiSymbol = true;
-let myTurn = null;
+
 let beginningTurn = false;
 let clickCounter = 9;
 let hasWon = false;
@@ -42,28 +43,29 @@ const winConditions = [
 ];
 
 function startOnlineMultiplayer() {
-  const socket = io('http://localhost:3000')
-  const playerUuid = uuidv4();
+  const socket = io()
 
-  const playerName = localStorage.getItem('playerName') || 'Player-'+ playerUuid
-
+  const playerName = localStorage.getItem('playerName') || uuidv4()
   localStorage.setItem('playerName', playerName)
-  socket.emit('register-player', playerName)
+  socket.emit('registered', playerName)
 
-  socket.on('match-created', matchObject => {
-    console.log(matchObject.xPlayer == playerName ? `xPlayer` : 'oPlayer' );
 
-    if (matchObject.xPlayer == playerName) {
+  socket.on('match-created', sign => {
+    
+    console.log(sign == 'x' ? `xPlayer` : 'oPlayer' );
+
+    if (sign == 'x') {
+      // if client is xPlayer,
       // do first move
       myTurn = true;
       document.querySelector('.unclickable-overlay').style.display = "none"
-    } else if (matchObject.oPlayer == playerName) {
+    } else if (sign == 'o') {
+      // if client is oPlayer,
       // await first move
       myTurn = false;
     }
     socket.on('field', (move) => {
       console.log(`got that: ${move}`);
-      console.log(document.getElementById(move));
       // your custom code to set a field
       fillBoxByID(move);
       myTurn = true;
@@ -75,7 +77,7 @@ function startOnlineMultiplayer() {
 
 window.onload = function () {
   // [...document.getElementsByClassName('menu-button')].forEach((button) => {
-  //   console.log(button);    
+  //   console.log(button);
   //   button.addEventListener("click", handleMenuButton(button.classList))
   // });
 }
@@ -333,7 +335,7 @@ function resetBoard() {
 
     addBoxListener();
     if (gameMode === GAME_MODES.SINGLEPLAYER && aiSymbol == beginningTurn) {
-      turnAI();      
+      turnAI();
     }
   }
 }

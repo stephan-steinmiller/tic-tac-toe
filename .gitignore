@@ -1,6 +1,5 @@
 /.idea/
 /node_modules/
 /callback.js
-/serverConstants.js
 /client/client.js
-/socketScriptForGame.js
+/client/socketScriptForGame.js

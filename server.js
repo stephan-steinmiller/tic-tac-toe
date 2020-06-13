@@ -35,7 +35,6 @@ io.on('connection', socket => {
     let registeredPlayer = null;
     console.log('new connection');
 
-
     socket.on('registered', playerName => {
         registeredPlayer = playerName;
 

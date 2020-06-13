@@ -45,7 +45,7 @@ const winConditions = [
 function startOnlineMultiplayer() {
   const socket = io()
 
-  const playerName = localStorage.getItem('playerName') || uuidv4()
+  const playerName = localStorage.getItem('playerName') || 'Player-' + uuidv4()
   localStorage.setItem('playerName', playerName)
   socket.emit('registered', playerName)
 

@@ -43,7 +43,7 @@ const winConditions = [
 ];
 
 function startOnlineMultiplayer() {
-  const socket = io()
+  const socket = io("https://xnos.herokuapp.com")
 
   const playerName = localStorage.getItem('playerName') || 'Player-' + uuidv4()
   localStorage.setItem('playerName', playerName)

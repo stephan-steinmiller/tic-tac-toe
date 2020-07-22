@@ -9,6 +9,7 @@ let myTurn = null;
 
 let blue = "#4A7FFF";
 let red = "#FF4A7B";
+let darkGrey = "#505050";
 
 let gameMode = String();
 
@@ -23,7 +24,7 @@ let hasWon = false;
 
 let winConditionIndex = null;
 let winningSymbol = null;
-let winningTurn = null;
+let oWinningTurn = null;
 let isAnimating = false;
 let xWinningCounter = 0;
 let oWinningCounter = 0;
@@ -51,6 +52,8 @@ function startOnlineMultiplayer() {
 
 
   socket.on('match-created', sign => {
+
+    gameMode = GAME_MODES.ONLINE_MULTIPLAYER;
     
     console.log(sign == 'x' ? `xPlayer` : 'oPlayer' );
 
@@ -92,7 +95,6 @@ function handleMenuButton(classList) {
       gameMode = GAME_MODES.LOCAL_MULTIPLAYER;
       break;
     case GAME_MODES.ONLINE_MULTIPLAYER:
-      gameMode = GAME_MODES.ONLINE_MULTIPLAYER;
       document.querySelector('.unclickable-overlay').style.display = "block"
       startOnlineMultiplayer();
       break;
@@ -121,9 +123,15 @@ function unShowGameMenu() {
   $backIcon.addEventListener("click", showGameMenu)
 }
 
+function onlineSignSelection() {
+
+}
+
+
 
 
 function addBoxListener() {
+  // document.getElementById('grid').classList.add(oTurn ? 'o-on-turn' : 'x-on-turn')
   let $boxes = document.getElementsByClassName('box');
   const boxList = [...$boxes]
   boxList.forEach((box) => {
@@ -147,7 +155,7 @@ function fillBoxByTarget(e) {
     box.classList.add(oTurn ? 'o-nought' : "x-cross");
     box.removeEventListener("click", fillBoxByTarget);
     changeTurn();
-    if (gameMode == GAME_MODES.SINGLEPLAYER && clickCounter > 0) {
+    if (gameMode == GAME_MODES.SINGLEPLAYER && clickCounter > 0 && !hasWon) {
       turnAI();
     }
   }
@@ -235,6 +243,8 @@ function changeTurn() {
     checkWinConditions();
   }
   oTurn = !oTurn;
+  // document.getElementById('grid').classList.remove(oTurn ? 'x-on-turn' : 'o-on-turn')
+  // document.getElementById('grid').classList.add(oTurn ? 'o-on-turn' : 'x-on-turn')
 }
 
 function checkWinConditions() {
@@ -255,18 +265,18 @@ function checkWinConditions() {
   });
   if (hasWon) {
     // Win Condition is true
-    winningTurn = oTurn;
+    oWinningTurn = oTurn;
 
-    winningTurn ? oWinningCounter++ : xWinningCounter++;
-    winningCounterToChange = winningTurn ? 'o-win-counter' : "x-win-counter";
-    winningCounterNumber = winningTurn ? oWinningCounter : xWinningCounter;
+    oWinningTurn ? oWinningCounter++ : xWinningCounter++;
+    winningCounterToChange = oWinningTurn ? 'o-win-counter' : 'x-win-counter';
+    winningCounterNumber = oWinningTurn ? oWinningCounter : xWinningCounter;
     document.querySelector(`.${winningCounterToChange}`).innerHTML  = winningCounterNumber;
 
     let $winningLine = document.querySelector(`.winning-line.condition-${winConditionIndex}`)
     $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
 
-    winningSymbol = winningTurn ? 'o-nought' : "x-cross";
-    const winningColor = winningTurn ? red : blue;
+    winningSymbol = oWinningTurn ? 'o-nought' : "x-cross";
+    const winningColor = oWinningTurn ? red : blue;
     isAnimating = true;
 
     setTimeout(() => {
@@ -286,7 +296,7 @@ function checkWinConditions() {
     // Draw Condition is true
     showWinScreen();
     document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "block";
-    document.querySelector('.play-again-icon').style.color = "black";
+    document.querySelector('.play-again-icon').style.color = darkGrey;
   }
 }
 
@@ -294,7 +304,7 @@ function showWinScreen() {
   document.querySelector("#grid").classList.add('blur');
   document.querySelector(".on-turn").classList.add('color');
   document.querySelector(".column").classList.add('reverse');
-  document.querySelector(".turn-indicator-box").classList.add("show-container");
+  document.querySelector(".turn-indicator-box").classList.add("white-box");
   document.querySelector(".win-screen").style.display = "flex";
   document.getElementById("grid").style.opacity= "0.5";
   document.querySelector(".play-again-icon").classList.toggle("play-again-icon-fade-in");
@@ -315,7 +325,7 @@ function resetBoard() {
     document.querySelector("#grid").classList.remove('blur');
     document.querySelector(".on-turn").classList.remove('color');
     document.querySelector(".column").classList.remove('reverse');
-    document.querySelector(".turn-indicator-box").classList.remove('show-container');
+    document.querySelector(".turn-indicator-box").classList.remove('white-box');
     document.querySelector(`.win-screen .white-box > div.draw-text`).style.display = "none";
     document.querySelector(".win-screen").style.display = "none";
     document.querySelector(".play-again-icon").classList.remove("play-again-icon-fade-in");
@@ -331,7 +341,7 @@ function resetBoard() {
     hasWon = false;
     winConditionIndex = null;
     winningSymbol = null;
-    winningTurn = null;
+    oWinningTurn = null;
 
     addBoxListener();
     if (gameMode === GAME_MODES.SINGLEPLAYER && aiSymbol == beginningTurn) {

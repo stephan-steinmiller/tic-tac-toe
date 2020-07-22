@@ -10,6 +10,7 @@
 
 :root {
   --bg-color: #EDF0F1;
+  --dark-grey: #505050;
   --blue: #4A7FFF;
   --red: #FF4A7B;
   --blue-gradient: linear-gradient(to top left, #4A7FFF, #85CAFF);
@@ -137,6 +138,7 @@ body {
   position: relative;
   z-index: 3;
   justify-content: center;
+  margin: 0 0 6rem;
 }
 
 .white-box {
@@ -144,13 +146,13 @@ body {
   width: 78rem;
   max-height: 36vw;
   max-width: 78vw;
-  margin: 0 0 6rem;
   background-color: white;
   border-radius: 12rem;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  color: var(--dark-grey);
 }
 .win-screen .white-box > div {
   display: none;
@@ -190,8 +192,8 @@ body {
   display: none;
   z-index: 3;
   position: absolute;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
 }
 #grid {
   position: relative;
@@ -244,6 +246,26 @@ body {
   background-size: 100% 100%;
 }
 
+.x-on-turn .box:not(.o-nought):hover .preview{
+  height: 11rem;
+  width: 11rem;
+  max-height: 11vw;
+  max-width: 11vw;
+  background: url(assets/svg/x-cross.svg);
+  background-size: 100% 100%;
+  opacity: 0.5;
+}
+
+.o-on-turn .box:not(.x-cross):hover .preview{
+  height: 12rem;
+  width: 12rem;
+  max-height: 12vw;
+  max-width: 12vw;
+  background: url(assets/svg/o-nought.svg) no-repeat;
+  background-size: 100% 100%;
+  opacity: 0.5;
+}
+
 .sized-box {
   height: 20rem;
 }
@@ -252,18 +274,11 @@ body {
   flex-direction: row;
   justify-content: center;
 }
-.turn-indicator-box.show-container{
+.turn-indicator-box.white-box{
   display: flex;
   margin-bottom: -14rem;
-  align-items: center;
-  height: 36rem;
-  width: 78rem;
-  max-height: 78vw;
-  max-width: 78vw;
-  border-radius: 12rem;
-  background-color: white;
 }
-.turn-indicator-box.show-container > .x-turn, .turn-indicator-box.show-container > .o-turn, .x-won.x-cross, .o-won.o-nought {
+.turn-indicator-box.white-box > .x-turn, .turn-indicator-box.white-box > .o-turn, .x-won.x-cross, .o-won.o-nought {
   background: var(--bg-color);
 }
 .x-turn, .o-turn, .x-won, .o-won {
@@ -311,13 +326,13 @@ body {
   align-items: center;
   width: 30rem;
   max-width: 30vw;
+  color: var(--dark-grey);
 }
 .x-win-counter:after {
   content: ":";
 }
 .x-win-counter, .x-win-counter:after, .o-win-counter {
   font-size: 12rem;
-  color: var(--grey);
 }
 
 .play-again-icon {

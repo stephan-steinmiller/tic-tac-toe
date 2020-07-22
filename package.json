@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env PORT=3000 nodemon server.js",
     "serve": "node server.js",
-    "dist": "surge client/ --domain xno2.surge.sh"
+    "dist": "surge client/ --domain xno.surge.sh"
   },
   "repository": {
     "type": "git",

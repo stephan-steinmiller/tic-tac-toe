@@ -23,7 +23,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Comfortaa';
+  font-family: 'Comfortaa', cursive;
   font-size: 0.564971751vh;
 
   user-select: none;
@@ -32,17 +32,18 @@
 body {
   min-height: 100vh;
   /* width: 100vw; */
-  padding: 0 0 23rem;
   background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   align-items: center;
+  justify-content: flex-end;
+  padding: 0 0 23rem;
 }
+
 
 .game-menu {
   position: absolute;
-  z-index: 4;
+  z-index: 5;
   display: flex;
   min-height: 100vh;
   width: 100vw;
@@ -118,6 +119,10 @@ body {
 
 
 .header {
+  position: fixed;
+  top: 0;
+  z-index: 4;
+  background-color: var(--bg-color);
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -126,22 +131,21 @@ body {
 }
 .back-icon {
   position: relative;
-  height: 8rem;
-  width: 8rem;
+  height: 10rem;
+  width: 10rem;
   max-width: 8vw;
-  margin: 12rem 0 12rem 7rem;
+  margin: 11rem 0 11rem 7rem;
 }
 
 
 .win-screen {
   display: none;
   position: relative;
-  z-index: 3;
   justify-content: center;
-  margin: 0 0 6rem;
+  margin: 32rem 0 6rem;
 }
 
-.white-box {
+.white-box, .show-box {
   height: 36rem;
   width: 78rem;
   max-height: 36vw;
@@ -165,14 +169,13 @@ body {
   display: block!important;
 }
 .win-screen .white-box .draw-text, .won-text {
-  color: var(--grey);
+  color: var(--dark-grey);
   font-size: 12rem;
 }
 
 .win-screen .show-winner-symbol ~ .draw-text {
   display: none!important;
 }
-
 
 .column.reverse {
   display: flex;
@@ -246,39 +249,39 @@ body {
   background-size: 100% 100%;
 }
 
-.x-on-turn .box:not(.o-nought):hover .preview{
+.x-on-turn .box:not(.o-nought):hover .symbol {
   height: 11rem;
   width: 11rem;
   max-height: 11vw;
   max-width: 11vw;
   background: url(assets/svg/x-cross.svg);
   background-size: 100% 100%;
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
-.o-on-turn .box:not(.x-cross):hover .preview{
+.o-on-turn .box:not(.x-cross):hover .symbol {
   height: 12rem;
   width: 12rem;
   max-height: 12vw;
   max-width: 12vw;
   background: url(assets/svg/o-nought.svg) no-repeat;
   background-size: 100% 100%;
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
 .sized-box {
   height: 20rem;
 }
-.turn-indicator-box {
+.turn-indicator {
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
-.turn-indicator-box.white-box{
+.turn-indicator.show-box{
   display: flex;
   margin-bottom: -14rem;
 }
-.turn-indicator-box.white-box > .x-turn, .turn-indicator-box.white-box > .o-turn, .x-won.x-cross, .o-won.o-nought {
+.turn-indicator.show-box > .x-turn, .turn-indicator.show-box > .o-turn, .x-won.x-cross, .o-won.o-nought {
   background: var(--bg-color);
 }
 .x-turn, .o-turn, .x-won, .o-won {

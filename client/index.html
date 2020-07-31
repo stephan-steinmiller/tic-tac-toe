@@ -25,9 +25,9 @@
             <img src="assets/svg/logo.svg" class="logo-icon" draggable="false" alt="">
           </div>
         </div>
-        <button class="menu-button singleplayer" onclick="handleMenuButton(this.classList)">Singleplayer</button>
-        <button class="menu-button localMultiplayer" onclick="handleMenuButton(this.classList)">local Multiplayer</button>
-        <button class="menu-button onlineMultiplayer" onclick="handleMenuButton(this.classList)">online Multiplayer</button>
+        <button class="menu-button" value="singleplayer" onclick="handleMenuButton(this.value)">Singleplayer</button>
+        <button class="menu-button" value="localMultiplayer" onclick="handleMenuButton(this.value)">local Multiplayer</button>
+        <button class="menu-button" value="onlineMultiplayer" onclick="handleMenuButton(this.value)">online Multiplayer</button>
       </div>
     </div>
 
@@ -49,9 +49,9 @@
     </div>
 
     <div class="column">
-      <div class="unclickable-overlay"></div>
       <div class="wrapper">
         <div id="grid">
+          <div class="unclickable-overlay"></div>
           <div id="a1" class="box">
             <div class="symbol"></div>
             <div class="preview"></div>
@@ -109,11 +109,12 @@
 
       <div class="sized-box"></div>
 
-      <div class="sign-selector">
-
+      <div class="sign-selection">
+        <div class="x-sign"></div>
+        <div class="o-sign"></div>
       </div>
 
-      <div class="turn-indicator-box">
+      <div class="turn-indicator">
         <div class="x-turn x-cross on-turn">
           <div class="symbol"></div>
         </div>

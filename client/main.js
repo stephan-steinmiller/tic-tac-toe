@@ -90,13 +90,12 @@ function handleMenuButton(value) {
   switch (value) {
     case GAME_MODES.SINGLEPLAYER:
       gameMode = GAME_MODES.SINGLEPLAYER;
-      showOnlineSignSelection()
       break;
     case GAME_MODES.LOCAL_MULTIPLAYER:
       gameMode = GAME_MODES.LOCAL_MULTIPLAYER;
       break;
     case GAME_MODES.ONLINE_MULTIPLAYER:
-      showOnlineSignSelection()
+      // showOnlineSignSelection()
       startOnlineMultiplayer();
       break;
   }

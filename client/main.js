@@ -49,13 +49,13 @@ function startOnlineMultiplayer() {
   const playerName = localStorage.getItem('playerName') || 'Player-' + uuidv4()
   localStorage.setItem('playerName', playerName)
   socket.emit('registered', playerName)
-
+  
 
   socket.on('match-created', sign => {
 
-    gameMode = GAME_MODES.ONLINE_MULTIPLAYER;
+    hideOnlineSignSelection()
     
-    console.log(sign == 'x' ? `xPlayer` : 'oPlayer' );
+    console.log(sign == ('x' ? `xPlayer` : 'oPlayer'));
 
     if (sign == 'x') {
       // if client is xPlayer,
@@ -66,6 +66,7 @@ function startOnlineMultiplayer() {
       // if client is oPlayer,
       // await first move
       myTurn = false;
+      document.querySelector('.unclickable-overlay').style.display = "block"
     }
     socket.on('field', (move) => {
       console.log(`got that: ${move}`);
@@ -90,13 +91,16 @@ function handleMenuButton(value) {
   switch (value) {
     case GAME_MODES.SINGLEPLAYER:
       gameMode = GAME_MODES.SINGLEPLAYER;
+      // showSignSelection()
       break;
     case GAME_MODES.LOCAL_MULTIPLAYER:
       gameMode = GAME_MODES.LOCAL_MULTIPLAYER;
       break;
     case GAME_MODES.ONLINE_MULTIPLAYER:
-      // showOnlineSignSelection()
+      gameMode = GAME_MODES.ONLINE_MULTIPLAYER;
+      document.querySelector('.unclickable-overlay').style.display = "block"
       startOnlineMultiplayer();
+      // showSignSelection()
       break;
   }
   if (clickCounter === 9) {
@@ -114,32 +118,59 @@ function handleMenuButton(value) {
 
 function showGameMenu() {
   document.querySelector('.game-menu').style.display = "flex";
-  let $backIcon = document.querySelector('.back-icon');
-  $backIcon.removeEventListener("click", showGameMenu)
+  let $backButton = document.querySelector('.back-button');
+  $backButton.removeEventListener("click", showGameMenu);
 }
 function unShowGameMenu() {
   document.querySelector('.game-menu').style.display = "none";
-  let $backIcon = document.querySelector('.back-icon');
-  $backIcon.addEventListener("click", showGameMenu)
+  let $backButton = document.querySelector('.back-button');
+  $backButton.addEventListener("click", showGameMenu);
 }
 
-function showOnlineSignSelection() {
-  document.querySelector('.wrapper').style.display = "none"
-  document.querySelector('.turn-indicator').style.display = "none"
-  document.querySelector(".sign-selection").classList.add('show-box');
+function showSignSelection() {
+  document.querySelector('.wrapper').style.display = "none";
+  document.querySelector('.turn-indicator').style.display = "none";
+  document.querySelector(".sign-selection").style.display = "block";
+  let selectSignButtons = [...document.querySelectorAll(".sign-select-button")]
+  selectSignButtons.forEach((button) => {
+    button.addEventListener("click", requestSign);
+  });
 }
-function hideOnlineSignSelection() {
-  document.querySelector('.wrapper').style.display = "flex"
-  document.querySelector('.turn-indicator').style.display = "flex"
-  document.querySelector(".sign-selection").classList.remove('show-box');
-
+function hideSignSelection() {
+  document.querySelector('.wrapper').style.display = "flex";
+  document.querySelector('.turn-indicator').style.display = "flex";
+  document.querySelector(".sign-selection").style.display = "none";
+  let selectSignButtons = [...document.querySelectorAll(".sign-select-button")]
+  selectSignButtons.forEach((button) => {
+    button.removeEventListener("click", requestSign);
+    button.style.display = "flex";
+  });
 }
-
-
+function requestSign (e) {
+  if ([...e.target.classList].indexOf("x-sign")> -1) {
+    console.log("x selected");
+    if (gameMode === GAME_MODES.SINGLEPLAYER) {
+      
+    }
+    document.querySelector('.sign-select-button.o-sign').style.display = "none";
+  } else if ([...e.target.classList].indexOf("o-sign")> -1) {
+    console.log("x selected");
+    if (gameMode === GAME_MODES.SINGLEPLAYER) {
+      
+    } else if (gameMode === GAME_MODES.ONLINE_MULTIPLAYER) {
+      gameSocket.emit('request-o-sign')
+    }
+    document.querySelector('.sign-select-button.x-sign').style.display = "none";
+  }
+  let selectSignButtons = [...document.querySelectorAll(".sign-select-button")]
+  selectSignButtons.forEach((button) => {
+    button.removeEventListener("click", requestSign);
+  });
+}
 
 function addBoxListener() {
   // document.getElementById('grid').classList.add(oTurn ? 'o-on-turn' : 'x-on-turn')
-  let $boxes = document.getElementsByClassName('box');
+  let $boxes = document.querySelectorAll('.box');
   const boxList = [...$boxes]
   boxList.forEach((box) => {
     box.removeEventListener("click", fillBoxByTarget)
@@ -147,7 +178,7 @@ function addBoxListener() {
   });
 }
 
-function fillBoxByTarget(e) {
+function fillBoxByTarget (e) {
   if (!hasWon) {
     if (gameMode == GAME_MODES.ONLINE_MULTIPLAYER && myTurn) {
       gameSocket.emit('set-field', e.target.id)
@@ -168,7 +199,7 @@ function fillBoxByTarget(e) {
   }
 }
 
-function fillBoxByID(id) {
+function fillBoxByID (id) {
   clickCounter--;
 
   let box = document.getElementById(id);
@@ -244,7 +275,7 @@ function turnAI() {
 function changeTurn() {
   let $onTurn = document.querySelector(".on-turn");
   $onTurn.classList.toggle("on-turn");
-  const turnToToggle = !oTurn ? 'o-turn' : "x-turn"
+  const turnToToggle = (!oTurn ? 'o-turn' : "x-turn")
   $onTurn = document.querySelector(`.turn-indicator .${turnToToggle}`);
   $onTurn.classList.toggle("on-turn");
 
@@ -257,7 +288,7 @@ function changeTurn() {
 }
 
 function checkWinConditions() {
-  const symbolToCheck = oTurn ? "o-nought" : "x-cross";
+  const symbolToCheck = (oTurn ? "o-nought" : "x-cross");
   // finding all boxes with the current Symbol
   let $boxes = [...document.querySelectorAll(`.box.${symbolToCheck}`)];
   // puting the ID's into an Array
@@ -277,15 +308,15 @@ function checkWinConditions() {
     oWinningTurn = oTurn;
 
     oWinningTurn ? oWinningCounter++ : xWinningCounter++;
-    winningCounterToChange = oWinningTurn ? 'o-win-counter' : 'x-win-counter';
-    winningCounterNumber = oWinningTurn ? oWinningCounter : xWinningCounter;
+    winningCounterToChange = (oWinningTurn ? 'o-win-counter' : 'x-win-counter');
+    winningCounterNumber = (oWinningTurn ? oWinningCounter : xWinningCounter);
     document.querySelector(`.${winningCounterToChange}`).innerHTML  = winningCounterNumber;
 
     let $winningLine = document.querySelector(`.winning-line.condition-${winConditionIndex}`)
     $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
 
-    winningSymbol = oWinningTurn ? 'o-nought' : "x-cross";
-    const winningColor = oWinningTurn ? red : blue;
+    winningSymbol = (oWinningTurn ? 'o-nought' : "x-cross");
+    const winningColor = (oWinningTurn ? red : blue);
     isAnimating = true;
 
     setTimeout(() => {

@@ -7,8 +7,8 @@ const GAME_MODES = {
 let gameSocket = null;
 let myTurn = null;
 
-let blue = "#4A7FFF";
-let red = "#FF4A7B";
+let blueColor = "#4A7FFF";
+let redColor = "#FF4A7B";
 let darkGrey = "#505050";
 
 let gameMode = String();
@@ -45,6 +45,7 @@ const winConditions = [
 
 function startOnlineMultiplayer() {
   const socket = io("https://xsnos.herokuapp.com")
+  console.log(socket);
 
   const playerName = localStorage.getItem('playerName') || 'Player-' + uuidv4()
   localStorage.setItem('playerName', playerName)
@@ -52,10 +53,11 @@ function startOnlineMultiplayer() {
   
 
   socket.on('match-created', sign => {
+      console.log(sign);
 
-    hideOnlineSignSelection()
+    // hideSignSelection()
     
-    console.log(sign == ('x' ? `xPlayer` : 'oPlayer'));
+    console.log("sign is x"+ sign == ('x' ? `xPlayer` : 'oPlayer'));
 
     if (sign == 'x') {
       // if client is xPlayer,
@@ -316,7 +318,7 @@ function checkWinConditions() {
     $winningLine.classList.toggle(`winning-condition-${winConditionIndex}-starting-point`);
 
     winningSymbol = (oWinningTurn ? 'o-nought' : "x-cross");
-    const winningColor = (oWinningTurn ? red : blue);
+    const winningColor = (oWinningTurn ? redColor : blueColor);
     isAnimating = true;
 
     setTimeout(() => {
